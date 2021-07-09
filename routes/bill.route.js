@@ -20,23 +20,18 @@ router.get('/', async (req, res) => {
     const match = {};
     if (req.query.status) match.status = { '$regex': `^${req.query.status}$`, '$options': 'i' };
     if (req.query.apartmentId) match.apartmentId = ObjectId(req.query.apartmentId);
-    let date = req.query.date || null;
-    if(req.query.date == '01-1970'){
-        date = null;
-    }
-
+    const qDate = Number(req.query.date);
+    const range = [
+        moment(qDate).startOf('months').valueOf(),
+        moment(qDate).endOf('months').valueOf()
+    ]
+    if (qDate) match.date = { $gt: range[0], $lt: range[1] };
     let v = await HELPER.filter(Bill, match, start, limit);
     const tmpResult = {
         total: v[0].total.length > 0 ? v[0].total[0].count : 0,
         items: v[0].items
     }
-    console.log(tmpResult)
-
-    const result = await formatBill(tmpResult.items, date);
-    res.send({
-        total: tmpResult.items.length,
-        items: result
-    })
+    res.send(tmpResult)
 })
 
 
