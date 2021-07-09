@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
     if (req.query.aptId) match.aptId = ObjectId(req.query.aptId);
     if (req.query.blockId) match.blockId = ObjectId(req.query.blockId);
 
-    let v = await HELPER.filter(Resident, match, start, limit);
+    let v = await HELPER.filter(Resident, match, start, limit, { blockId: 1, aptId: 1 });
     res.send({
         total: v[0].total.length > 0 ? v[0].total[0].count : 0,
         items: v[0].items
@@ -288,6 +288,6 @@ router.post('/upload-avatar/:id', upload.single('avatarUrl'), async (req, res, n
     }
 
 
-    
+
 })
 module.exports = router;

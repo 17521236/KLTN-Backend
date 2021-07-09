@@ -30,6 +30,7 @@ router.get('/', async (req, res) => {
         total: v[0].total.length > 0 ? v[0].total[0].count : 0,
         items: v[0].items
     }
+    console.log(tmpResult)
 
     const result = await formatBill(tmpResult.items, date);
     res.send({

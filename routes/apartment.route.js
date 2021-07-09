@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
     //     total,
     //     items: apartments
     // });
-    let v = await HELPER.filter(Apartment, match, start, limit);
+    let v = await HELPER.filter(Apartment, match, start, limit, { blockId: 1, name: 1 });
     res.send({
         total: v[0].total.length > 0 ? v[0].total[0].count : 0,
         items: v[0].items

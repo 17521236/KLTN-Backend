@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
     const start = parseInt(req.query.start) ? parseInt(req.query.start) : 0;
     const limit = parseInt(req.query.limit) ? parseInt(req.query.limit) : 10;
     if (req.query.name) match.name = { '$regex': `${req.query.name}`, '$options': 'i' };
-    let v = await HELPER.filter(Block, match, start, limit);
+    let v = await HELPER.filter(Block, match, start, limit, { name: 1 });
     res.send({
         total: v[0].total.length > 0 ? v[0].total[0].count : 0,
         items: v[0].items
@@ -55,15 +55,15 @@ router.delete('/:id', async (req, res) => {
     let id = req.params.id;
     const apartments = await APartment.find({ blockId: id });
     if (apartments.length > 0) {
-        res.status(400).send(HELPER.errorHandler('', 3007 , 'Tồn tại căn hộ thuộc block'))
+        res.status(400).send(HELPER.errorHandler('', 3007, 'Tồn tại căn hộ thuộc block'))
         return;
-    }else{
+    } else {
         try {
             let result = await Block.findOneAndDelete({ _id: id });
             res.send(result)
             return;
         } catch (error) {
-            res.status(400).send(HELPER.errorHandler(error, 3000 , 'Removed fail !!!'))
+            res.status(400).send(HELPER.errorHandler(error, 3000, 'Removed fail !!!'))
             return;
         }
     }

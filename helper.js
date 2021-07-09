@@ -1,5 +1,22 @@
-const filter = async (schema, match, start, limit) => {
-    const aggregationPaginated = [
+const filter = async (schema, match, start, limit, sort) => {
+    const aggregationPaginated = sort? [
+        {
+            $match: match
+        },
+        {
+            $sort: sort 
+        },
+        {
+            $facet: {
+                items: [{ $skip: start }, { $limit: limit }],
+                total: [
+                    {
+                        $count: 'count'
+                    }
+                ]
+            }
+        }
+    ] :  [
         {
             $match: match
         },
@@ -13,7 +30,8 @@ const filter = async (schema, match, start, limit) => {
                 ]
             }
         }
-    ];
+    ];;
+
     const result = await schema.aggregate(aggregationPaginated);
     return result;
 
