@@ -12,6 +12,7 @@ const mongoose = require('./mongoose')
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+
 //import router
 const blockRoute = require('./routes/block.route');
 const apartmentRoute = require('./routes/apartment.route');
@@ -23,7 +24,7 @@ const paymentRoute = require('./routes/paymentMethod.route');
 const billRoute = require('./routes/bill.route');
 const dashboardRoute = require('./routes/dashboard.route');
 const employeeRoute = require('./routes/user.route');
-
+const generateRoute = require('./routes/generate.route');
 
 //use routes
 app.use('/api/block', blockRoute);
@@ -36,6 +37,8 @@ app.use('/api/payment', paymentRoute);
 app.use('/api/bill', billRoute);
 app.use('/api/dashboard', dashboardRoute);
 app.use('/api/employee', employeeRoute);
+// for generate
+app.use('/api/generate', generateRoute);
 
 // enable CORS
 app.use(function (req, res, next) {

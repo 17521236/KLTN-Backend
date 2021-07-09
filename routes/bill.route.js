@@ -20,9 +20,9 @@ router.get('/', async (req, res) => {
     const match = {};
     if (req.query.status) match.status = { '$regex': `^${req.query.status}$`, '$options': 'i' };
     if (req.query.apartmentId) match.apartmentId = ObjectId(req.query.apartmentId);
-    let month = req.query.month || null;
-    if(req.query.month == '01-1970'){
-        month = null;
+    let date = req.query.date || null;
+    if(req.query.date == '01-1970'){
+        date = null;
     }
 
     let v = await HELPER.filter(Bill, match, start, limit);
@@ -31,9 +31,9 @@ router.get('/', async (req, res) => {
         items: v[0].items
     }
 
-    const result = await formatBill(tmpResult.items, month);
+    const result = await formatBill(tmpResult.items, date);
     res.send({
-        total: tmpResult.total,
+        total: result.length,
         items: result
     })
 })
@@ -107,7 +107,13 @@ router.post('/', async (req, res) => {
             billLastMonth = i;
         }
         if (i.status == 'PENDING') {
-            res.status(400).send(HELPER.errorHandler('', 5556, 'Tồn tại chi phí đang chờ duyệt. Vui lòng duyệt trước khi tạo chi phí mới.'))
+            const month = moment(i.date).format('MM-yyyy');
+            res.status(400).send(HELPER.errorHandler('', 5556, `Chi phí tháng ${month} đang chờ duyệt. Vui lòng duyệt trước khi tạo chi phí mới.`))
+            return;
+        }
+        if (i.status == 'NOT_APPROVE') {
+            const month = moment(i.date).format('MM-yyyy');
+            res.status(400).send(HELPER.errorHandler('', 5557, `Chi phí tháng ${month} chưa thanh toán. Vui lòng duyệt trước khi tạo chi phí mới.`))
             return;
         }
     }

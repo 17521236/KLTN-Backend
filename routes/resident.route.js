@@ -31,6 +31,7 @@ router.get('/:id', async (req, res) => {
     const resident = await Resident.findById({ _id: id });
     const vehicle = await Vehicle.find({ residentId: id });
     result = { ...resident._doc, totalVehicle: vehicle.length };
+    // console.log(result);
     res.send(result);
 })
 
@@ -265,5 +266,28 @@ router.post('/mobile/resetPassword', async (req, res) => {
         res.status(400).send(HELPER.errorHandler(error, 1000));
         return;
     }
+})
+
+var multer = require('multer')
+var upload = multer();
+router.post('/upload-avatar/:id', upload.single('avatarUrl'), async (req, res, next) => {
+    // req.file is the `avatar` file
+    // req.body will hold the text fields, if there were any
+    let id = req.params.id;
+    const file = req.file;
+    const data = {
+        avatarUrl: `data:image/png;base64, ${Buffer.from(file.buffer).toString('base64')}`
+    };
+    try {
+        let result = await Resident.findOneAndUpdate({ _id: id }, { $set: data })
+        res.send(result);
+        return;
+    } catch (error) {
+        res.status(400).send(HELPER.errorHandler(error, 2000));
+        return;
+    }
+
+
+    
 })
 module.exports = router;
