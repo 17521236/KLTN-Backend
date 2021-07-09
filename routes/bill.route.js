@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
 
     const result = await formatBill(tmpResult.items, date);
     res.send({
-        total: result.length,
+        total: tmpResult.items.length,
         items: result
     })
 })
