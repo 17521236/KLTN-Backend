@@ -20,22 +20,29 @@ router.get('/', async (req, res) => {
     const match = {};
     if (req.query.status) match.status = { '$regex': `^${req.query.status}$`, '$options': 'i' };
     if (req.query.apartmentId) match.apartmentId = ObjectId(req.query.apartmentId);
-    const qDate = Number(req.query.date);
-    const range = [
-        moment(qDate).startOf('months').valueOf(),
-        moment(qDate).endOf('months').valueOf()
-    ]
-    if (qDate) match.date = { $gt: range[0], $lt: range[1] };
+    const qDate = Number(req.query.month);
+    if (qDate !== 0) {
+        const range = [
+            moment(qDate).startOf('months').valueOf(),
+            moment(qDate).endOf('months').valueOf()
+        ]
+        console.log(qDate, range)
+        match.date = { $gt: range[0], $lt: range[1] };
+    }
     let v = await HELPER.filter(Bill, match, start, limit);
     const tmpResult = {
         total: v[0].total.length > 0 ? v[0].total[0].count : 0,
         items: v[0].items
     }
-    res.send(tmpResult)
+    const items = await formatBill(tmpResult.items)
+    res.send({
+        total: tmpResult.total,
+        items
+    })
 })
 
 
-formatBill = async (bills, month) => {
+formatBill = async (bills) => {
     let temp = [];
     for (let i of bills) {
         const apartment = await Apartment.find({ _id: i.apartmentId });
@@ -46,14 +53,7 @@ formatBill = async (bills, month) => {
         };
         temp.push(el);
     }
-    return temp.filter(x => {
-        if (!month) return true;
-        return moment(x.date).format('MM-yyyy') === month
-    });
-    // return bills.filter(x => {
-    //     if (!month) return true;
-    //     return moment(x.date).format('MM-yyyy') === month
-    // });
+    return temp;
 }
 
 // get single bill
