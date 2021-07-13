@@ -48,6 +48,10 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.get('/start-server', (req, res) => {
+    res.send({});
+});
+
 app.get('/', (req, res) => {
     res.send('welcome');
 });
