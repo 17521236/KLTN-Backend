@@ -60,6 +60,22 @@ router.delete('/:id', async (req, res) => {
 });
 
 
+//get vehicle by apartment id
+
+router.get('/mobile/:aptId', async (req,res) => {
+    let aptId= req.params.aptId;
+    let vehicle = [];
+    const residentList = await Resident.find({ aptId: aptId});
+    for (let i of residentList) {
+        x = await Vehicle.find({ residentId: i._id });
+        v= [...x]
+        result= {  v,residentName: i.name,total: x.length}
+        console.log(result)
+        vehicle.push({...result})
+    }
+    res.send(vehicle);
+
+})
 
 module.exports = router;
 

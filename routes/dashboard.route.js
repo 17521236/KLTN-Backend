@@ -45,17 +45,36 @@ router.get('/', async (req, res) => {
     })
 })
 
+router.get('/mobile/bill/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const bill = await Bill.findById({_id: ObjectId(id)});
+        const apt = await Apartment.findById({ _id: bill.apartmentId });
+        const block = await Block.findById({ _id: apt.blockId });
+
+        res.send({
+            block: block.name,
+            apt: apt.name,
+            bill
+        });
+        return;
+    } catch (error) {
+        res.status(400).send(HELPER.errorHandler(error, 5003, 'error'));
+        return;
+    }
+})
+
 router.get('/mobile/:id', async (req, res) => {
     try {
         let tmp = await Resident.findById({ _id: req.params.id });
         let block = await Block.findById({ _id: tmp.blockId });
         let apt = await Apartment.findById({ _id: tmp.aptId });
-        let bill = await Bill.find({apartmentId: tmp.aptId});
+        let bill = await Bill.find({ apartmentId: tmp.aptId });
         res.send({
             name: tmp.name,
             block: block.name,
             apt: apt.name,
-            bill: bill.length > 0 ? bill[bill.length-1] :  {}
+            bill: bill.length > 0 ? bill[bill.length - 1] : {}
         });
         return;
     } catch (error) {

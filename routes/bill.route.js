@@ -264,7 +264,14 @@ router.post('/cost', async (req, res) => {
     })
 })
 
+// get bill by ID apartment
+router.get('/mobile/:aptId',async (req, res) => {
+    let aptId = req.params.aptId;
 
+    const Bills= await Bill.find({apartmentId:aptId});
+    res.send(Bills);
+
+})
 
 
 module.exports = router;
