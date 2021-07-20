@@ -10,7 +10,17 @@ const Block = require('../models/block');
 const Vehicle = require('../models/vehicle');
 const ObjectId = require('mongoose').Types.ObjectId;
 const { SERVICE_IDS } = require('../configs/sys.config');
-const moment = require('moment')
+const moment = require('moment');
+
+// get bill by ID apartment
+router.get('/mobile/:aptId',async (req, res) => {
+    let aptId = req.params.aptId;
+
+    const Bills= await Bill.find({apartmentId:aptId});
+    res.send(Bills);
+
+})
+
 // get all bill
 
 router.get('/', async (req, res) => {
@@ -264,14 +274,7 @@ router.post('/cost', async (req, res) => {
     })
 })
 
-// get bill by ID apartment
-router.get('/mobile/:aptId',async (req, res) => {
-    let aptId = req.params.aptId;
 
-    const Bills= await Bill.find({apartmentId:aptId});
-    res.send(Bills);
-
-})
 
 
 module.exports = router;

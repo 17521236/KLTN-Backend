@@ -3,10 +3,13 @@ const router = express.Router();
 const Apartment = require('../models/apartment');
 const HELPER = require('../helper');
 const Resident = require('../models/resident');
-const Block = require('../models/block');
 const Vehicle = require('../models/vehicle');
 const mongoose = require('mongoose');
 const ObjectId = require('mongoose').Types.ObjectId;
+const Bill = require('../models/bill');
+const moment = require('moment');
+
+
 //get all apartment in a block
 router.get('/', async (req, res) => {
     const match = {};
@@ -15,13 +18,6 @@ router.get('/', async (req, res) => {
 
     if (req.query.name) match.name = { '$regex': `${req.query.name}`, '$options': 'i' };
     if (req.query.blockId) match.blockId = ObjectId(req.query.blockId);
-
-    // let apartments = await HELPER.filterByField(Apartment, match, start, limit);
-    // let total = await HELPER.getTotal(Apartment, match);
-    // res.send({
-    //     total,
-    //     items: apartments
-    // });
     let v = await HELPER.filter(Apartment, match, start, limit, { blockId: 1, name: 1 });
     res.send({
         total: v[0].total.length > 0 ? v[0].total[0].count : 0,
@@ -29,7 +25,36 @@ router.get('/', async (req, res) => {
     })
 });
 
+// get all apartment don't have bill
+router.get('/bill/not-create', async (req, res) => {
+    let match = {};
+    const range = [
+        moment().startOf('months').valueOf(),
+        moment().endOf('months').valueOf()
+    ]
+    match.date = { $gt: range[0], $lt: range[1] };
+    console.log(match);
+    try {
+        const bills = await Bill.find(match);
+        const aptHaveBill = bills.map(bill => String(bill.apartmentId));
+        let apts = await Apartment.find({});
+        apts = apts.map(apt => {
+            return {
+                _id: String(apt._id),
+                name: apt.name,
+                blockId: apt.blockId
+            }
+        });
+        const result = apts.filter(apt => !aptHaveBill.includes(apt._id));
+        res.send({
+            total: result.length,
+            result
+        });
+    } catch (error) {
+        res.status(400).send(HELPER.errorHandler(error, 99999, 'Something wrong !!!'))
+    }
 
+});
 // get single apartment 
 router.get('/:id', async (req, res) => {
     let id = req.params.id;
@@ -92,18 +117,19 @@ router.delete('/:id', async (req, res) => {
     let id = req.params.id;
     const lists = await Resident.find({ aptId: id });
     if (lists.length > 0) {
-        res.status(400).send(HELPER.errorHandler('', 3007 , 'Tồn tại cư dân thuộc căn hộ'))
+        res.status(400).send(HELPER.errorHandler('', 3007, 'Tồn tại cư dân thuộc căn hộ'))
         return;
-    }else{
+    } else {
         try {
             let result = await Apartment.findOneAndDelete({ _id: id });
             res.send(result)
             return;
         } catch (error) {
-            res.status(400).send(HELPER.errorHandler(error, 3000 , 'Removed fail !!!'))
+            res.status(400).send(HELPER.errorHandler(error, 3000, 'Removed fail !!!'))
             return;
         }
     }
 })
+
 
 module.exports = router;
