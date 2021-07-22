@@ -37,7 +37,7 @@ router.get('/bill/not-create', async (req, res) => {
     try {
         const bills = await Bill.find(match);
         const aptHaveBill = bills.map(bill => String(bill.apartmentId));
-        let apts = await Apartment.find({});
+        let apts = await Apartment.find({}).sort({blockId: 1, name: 1});
         apts = apts.map(apt => {
             return {
                 _id: String(apt._id),
@@ -45,7 +45,7 @@ router.get('/bill/not-create', async (req, res) => {
                 blockId: apt.blockId
             }
         });
-        const result = apts.filter(apt => !aptHaveBill.includes(apt._id));
+        let result = apts.filter(apt => !aptHaveBill.includes(apt._id));
         res.send({
             total: result.length,
             result
